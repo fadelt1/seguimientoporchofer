@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Consulta de Viajes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    th {
+      background-color: #002060;
+      color: white;
+      padding: 10px;
+    }
+    td {
+      padding: 8px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    .total {
+      font-weight: bold;
+      background-color: #f0f0f0;
+    }
+    select, input, button {
+      padding: 10px;
+      margin: 10px;
+      font-size: 16px;
+    }
+    .tramo-interior {
+      background-color: #008000;
+      color: white;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Estado de Viajes</h1>
+
+  <label for="choferInput">Chofer:</label>
+  <select id="choferInput">
+    <option value="">Todos</option>
+  </select>
+
+  <label for="fechaViaje">Fecha de Viaje:</label>
+  <input type="date" id="fechaViaje">
+
+  <button onclick="filtrarViajes()">Filtrar</button>
+  <button onclick="mostrarTodos()">Mostrar Todos</button>
+
+  <table id="tablaViajes">
+    <tr>
+      <th>Fecha</th>
+      <th>Chofer</th>
+      <th>Origen</th>
+      <th>Destino</th>
+      <th>Flota</th>
+      <th>DT</th>
+      <th>Viático</th>
+      <th>CI</th>
+      <th>Tipo</th>
+      <th>RV General</th>
+      <th>Tipo de Viaje</th>
+    </tr>
+  </table>
+
+  <script>
+    let viajes = [];
+
+    async function obtenerViajesDesdeFirebase() {
+      const url = "https://toten-paraguay-5d90f-default-rtdb.firebaseio.com/.json";
+      try {
+        const respuesta = await fetch(url);
+        if (!respuesta.ok) throw new Error("No se pudo cargar los datos de Firebase");
+
+        const datos = await respuesta.json();
+        viajes = Object.values(datos);
+        poblarListaChoferes();
+        mostrarTodos();
+      } catch (error) {
+        console.error("Error al obtener los datos:", error);
+      }
+    }
+
+    function poblarListaChoferes() {
+      const choferesUnicos = [...new Set(viajes.map(v => v["MOTORISTA 1"]))];
+      choferesUnicos.sort();
+
+      const select = document.getElementById("choferInput");
+      select.innerHTML = `<option value="">Todos</option>`;
+
+      choferesUnicos.forEach(chofer => {
+        let option = document.createElement("option");
+        option.value = chofer;
+        option.textContent = chofer;
+        select.appendChild(option);
+      });
+    }
+
+    function formatearMoneda(valor) {
+      return `₲ ${parseFloat(valor).toLocaleString("es-PY")}`;
+    }
+
+    function determinarTipoViaje(viatico) {
+      return viatico > 0 ? "Tramo Interior" : "Tramo Metro";
+    }
+
+    // Función auxiliar para comparar dos fechas (día, mes y año)
+    function fechasIguales(fecha1, fecha2) {
+      return fecha1.getFullYear() === fecha2.getFullYear() &&
+             fecha1.getMonth() === fecha2.getMonth() &&
+             fecha1.getDate() === fecha2.getDate();
+    }
+
+    // Función para convertir una fecha en formato dd/mm/yyyy a objeto Date (local)
+    function parseDateString(dateStr) {
+      let partes = dateStr.trim().split("/");
+      // partes[0] => día, partes[1] => mes, partes[2] => año
+      return new Date(partes[2], partes[1] - 1, partes[0]);
+    }
+
+    // Función para procesar la fecha del input (que viene en formato yyyy-mm-dd) a Date local
+    function parseInputDate(dateStr) {
+      let partes = dateStr.split("-");
+      // partes[0] => año, partes[1] => mes, partes[2] => día
+      return new Date(partes[0], partes[1] - 1, partes[2]);
+    }
+
+    function filtrarViajes() {
+      const choferFiltro = document.getElementById("choferInput").value;
+      const fechaViajeInput = document.getElementById("fechaViaje").value;
+      // Procesar la fecha del input utilizando parseInputDate para obtener la fecha local correcta
+      const fechaViajeObj = fechaViajeInput ? parseInputDate(fechaViajeInput) : null;
+
+      const viajesFiltrados = viajes.filter(viaje => {
+        const cumpleChofer = choferFiltro ? viaje["MOTORISTA 1"] === choferFiltro : true;
+        // Convertir la fecha del registro (asumimos que viene en formato "dd/mm/yyyy") a objeto Date
+        const fechaRegistroStr = viaje["DATA DA VIAGEM"];
+        const fechaViajeRegistro = fechaRegistroStr ? parseDateString(fechaRegistroStr) : null;
+        const cumpleFecha = fechaViajeObj
+          ? (fechaViajeRegistro ? fechasIguales(fechaViajeRegistro, fechaViajeObj) : false)
+          : true;
+        return cumpleChofer && cumpleFecha;
+      });
+
+      mostrarViajes(viajesFiltrados);
+    }
+
+    function mostrarViajes(viajesFiltrados) {
+      const tabla = document.getElementById("tablaViajes");
+      tabla.innerHTML = `
+        <tr>
+          <th>Fecha</th>
+          <th>Chofer</th>
+          <th>Origen</th>
+          <th>Destino</th>
+          <th>Flota</th>
+          <th>DT</th>
+          <th>Viático</th>
+          <th>CI</th>
+          <th>Tipo</th>
+          <th>RV General</th>
+          <th>Tipo de Viaje</th>
+        </tr>
+      `;
+
+      if (!viajesFiltrados.length) {
+        tabla.innerHTML += `<tr><td colspan="11">No se encontraron viajes.</td></tr>`;
+        return;
+      }
+
+      viajesFiltrados.forEach(viaje => {
+        let tipoViaje = determinarTipoViaje(viaje["VIATICO"]);
+        let claseTipoViaje = tipoViaje === "Tramo Interior" ? "tramo-interior" : "";
+        
+        let fila = tabla.insertRow();
+        fila.innerHTML = `
+          <td>${viaje["DATA DA VIAGEM"]}</td>
+          <td>${viaje["MOTORISTA 1"]}</td>
+          <td>${viaje["ORIGEM IDA"]}</td>
+          <td>${viaje["DESTINO IDA"]}</td>
+          <td>${viaje["FLOTA "]}</td>
+          <td>${viaje["DT"]}</td>
+          <td>${formatearMoneda(viaje["VIATICO"])}</td>
+          <td>${viaje["CI"]}</td>
+          <td>${viaje["TIPO"]}</td>
+          <td>${formatearMoneda(viaje["RV GENERAL"])}</td>
+          <td class="${claseTipoViaje}">${tipoViaje}</td>
+        `;
+      });
+
+      let totalRVGeneral = viajesFiltrados.reduce((acc, viaje) => acc + (parseFloat(viaje["RV GENERAL"]) || 0), 0);
+      let totalViatico = viajesFiltrados.reduce((acc, viaje) => acc + (parseFloat(viaje["VIATICO"]) || 0), 0);
+
+      let filaTotal = tabla.insertRow();
+      filaTotal.innerHTML = `
+        <td colspan="6" class="total">TOTAL</td>
+        <td class="total">${formatearMoneda(totalViatico)}</td>
+        <td></td>
+        <td></td>
+        <td class="total">${formatearMoneda(totalRVGeneral)}</td>
+        <td></td>
+      `;
+    }
+
+    function mostrarTodos() {
+      mostrarViajes(viajes);
+    }
+
+    obtenerViajesDesdeFirebase();
+  </script>
+
+</body>
+</html>
