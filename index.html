@@ -8,6 +8,18 @@
       font-family: Arial, sans-serif;
       margin: 20px;
       text-align: center;
+      position: relative;
+    }
+    /* Estilo para el botón de volver al inicio */
+    .volver-inicio {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+    .volver-inicio button {
+      padding: 8px 14px;
+      font-size: 14px;
+      cursor: pointer;
     }
     table {
       width: 100%;
@@ -29,7 +41,7 @@
       font-weight: bold;
       background-color: #f0f0f0;
     }
-    select, input, button {
+    select, input, button.filtrar {
       padding: 10px;
       margin: 10px;
       font-size: 16px;
@@ -43,6 +55,11 @@
 </head>
 <body>
 
+  <!-- Botón para volver al inicio -->
+  <div class="volver-inicio">
+    <button onclick="volverAlInicio()">Volver al inicio</button>
+  </div>
+
   <h1>Estado de Viajes</h1>
 
   <label for="choferInput">Chofer:</label>
@@ -53,8 +70,8 @@
   <label for="fechaViaje">Fecha de Viaje:</label>
   <input type="date" id="fechaViaje">
 
-  <button onclick="filtrarViajes()">Filtrar</button>
-  <button onclick="mostrarTodos()">Mostrar Todos</button>
+  <button class="filtrar" onclick="filtrarViajes()">Filtrar</button>
+  <button class="filtrar" onclick="mostrarTodos()">Mostrar Todos</button>
 
   <table id="tablaViajes">
     <tr>
@@ -123,14 +140,14 @@
     // Función para convertir una fecha en formato dd/mm/yyyy a objeto Date (local)
     function parseDateString(dateStr) {
       let partes = dateStr.trim().split("/");
-      // partes[0] => día, partes[1] => mes, partes[2] => año
+      // partes[0] = día, partes[1] = mes, partes[2] = año
       return new Date(partes[2], partes[1] - 1, partes[0]);
     }
 
     // Función para procesar la fecha del input (que viene en formato yyyy-mm-dd) a Date local
     function parseInputDate(dateStr) {
       let partes = dateStr.split("-");
-      // partes[0] => año, partes[1] => mes, partes[2] => día
+      // partes[0] = año, partes[1] = mes, partes[2] = día
       return new Date(partes[0], partes[1] - 1, partes[2]);
     }
 
@@ -213,6 +230,11 @@
 
     function mostrarTodos() {
       mostrarViajes(viajes);
+    }
+
+    // Función para volver al inicio: redirige a la URL especificada
+    function volverAlInicio() {
+      window.location.href = 'https://fadelt1.github.io/indextotenadm/#';
     }
 
     obtenerViajesDesdeFirebase();
