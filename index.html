@@ -3,77 +3,172 @@
 <head>
   <meta charset="UTF-8">
   <title>Consulta de Viajes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      text-align: center;
-      position: relative;
+    :root {
+      --primary-color: #002060;
+      --secondary-color: #34d399;
+      --accent-color: #ff5722;
+      --background-color: #f4f4f9;
+      --card-bg: #ffffff;
+      --text-color: #333;
+      --font-family: 'Montserrat', sans-serif;
     }
-    /* Estilo para el botón de volver al inicio */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: var(--font-family);
+      background-color: var(--background-color);
+      color: var(--text-color);
+      position: relative;
+      padding: 20px;
+      text-align: center;
+    }
+    /* Botón "Volver al inicio" */
     .volver-inicio {
       position: absolute;
-      top: 10px;
-      left: 10px;
+      top: 20px;
+      left: 20px;
     }
     .volver-inicio button {
-      padding: 8px 14px;
+      padding: 10px 16px;
       font-size: 14px;
+      background-color: var(--primary-color);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
       cursor: pointer;
     }
+    .volver-inicio button:hover {
+      background-color: var(--secondary-color);
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: var(--primary-color);
+    }
+    /* Contenedor de filtros */
+    .filter-container {
+      width: 80%;
+      margin: 30px auto 20px auto;
+      text-align: center;
+    }
+    .filter-container label {
+      font-size: 16px;
+      margin: 0 5px;
+    }
+    .filter-container select,
+    .filter-container input,
+    .filter-container button.filtrar {
+      padding: 10px;
+      margin: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: var(--card-bg);
+    }
+    .filter-container button.filtrar {
+      background-color: var(--primary-color);
+      color: #fff;
+      cursor: pointer;
+      border: none;
+    }
+    .filter-container button.filtrar:hover {
+      background-color: var(--secondary-color);
+    }
+    /* Tabla al 100% con distribución fija */
     table {
       width: 100%;
+      margin: 20px auto;
       border-collapse: collapse;
-      margin-top: 20px;
       font-size: 14px;
+      table-layout: fixed;
+      background: var(--card-bg);
+    }
+    /* Distribución de columnas mediante colgroup */
+    table colgroup col:nth-child(1) { width: 7%; }   /* Fecha */
+    table colgroup col:nth-child(2) { width: 20%; }  /* Chofer */
+    table colgroup col:nth-child(3) { width: 12%; }  /* Origen */
+    table colgroup col:nth-child(4) { width: 12%; }  /* Destino */
+    table colgroup col:nth-child(5) { width: 5%; }   /* Flota */
+    table colgroup col:nth-child(6) { width: 10%; }  /* DT */
+    table colgroup col:nth-child(7) { width: 6%; }   /* Viático */
+    table colgroup col:nth-child(8) { width: 6%; }   /* CI */
+    table colgroup col:nth-child(9) { width: 2%; }   /* Tipo */
+    table colgroup col:nth-child(10) { width: 10%; } /* RV General */
+    table colgroup col:nth-child(11) { width: 10%; } /* Tipo de Viaje */
+
+    th, td {
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      text-align: center;
+      word-wrap: break-word;
     }
     th {
-      background-color: #002060;
-      color: white;
-      padding: 10px;
-    }
-    td {
-      padding: 8px;
-      border: 1px solid #ccc;
-      text-align: left;
+      background-color: var(--primary-color);
+      color: #fff;
     }
     .total {
       font-weight: bold;
       background-color: #f0f0f0;
     }
-    select, input, button.filtrar {
-      padding: 10px;
-      margin: 10px;
-      font-size: 16px;
+    /* Estilos para badges en "Tipo de Viaje" */
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #fff;
+      border-radius: 12px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
     }
-    .tramo-interior {
-      background-color: #008000;
-      color: white;
-      font-weight: bold;
+    .badge.interior {
+      background: linear-gradient(to right, #34d399, #059669);
+    }
+    .badge.metro {
+      background: linear-gradient(to right, #ff5722, #e64a19);
     }
   </style>
 </head>
 <body>
-
   <!-- Botón para volver al inicio -->
   <div class="volver-inicio">
     <button onclick="volverAlInicio()">Volver al inicio</button>
   </div>
-
+  
   <h1>Estado de Viajes</h1>
-
-  <label for="choferInput">Chofer:</label>
-  <select id="choferInput">
-    <option value="">Todos</option>
-  </select>
-
-  <label for="fechaViaje">Fecha de Viaje:</label>
-  <input type="date" id="fechaViaje">
-
-  <button class="filtrar" onclick="filtrarViajes()">Filtrar</button>
-  <button class="filtrar" onclick="mostrarTodos()">Mostrar Todos</button>
-
+  
+  <!-- Contenedor de filtros -->
+  <div class="filter-container">
+    <label for="choferInput">Chofer:</label>
+    <select id="choferInput">
+      <option value="">Todos</option>
+    </select>
+    
+    <label for="fechaViaje">Fecha de Viaje:</label>
+    <input type="date" id="fechaViaje">
+    
+    <button class="filtrar" onclick="filtrarViajes()">Filtrar</button>
+    <button class="filtrar" onclick="mostrarTodos()">Mostrar Todos</button>
+  </div>
+  
+  <!-- Tabla con colgroup para definir anchos -->
   <table id="tablaViajes">
+    <colgroup>
+      <col style="width: 7%;">
+      <col style="width: 20%;">
+      <col style="width: 12%;">
+      <col style="width: 12%;">
+      <col style="width: 5%;">
+      <col style="width: 9%;">
+      <col style="width: 8%;">
+      <col style="width: 8%;">
+      <col style="width: 2%;">
+      <col style="width: 9%;">
+      <col style="width: 10%;">
+    </colgroup>
     <tr>
       <th>Fecha</th>
       <th>Chofer</th>
@@ -88,16 +183,15 @@
       <th>Tipo de Viaje</th>
     </tr>
   </table>
-
+  
   <script>
     let viajes = [];
-
+    
     async function obtenerViajesDesdeFirebase() {
       const url = "https://toten-paraguay-5d90f-default-rtdb.firebaseio.com/.json";
       try {
         const respuesta = await fetch(url);
         if (!respuesta.ok) throw new Error("No se pudo cargar los datos de Firebase");
-
         const datos = await respuesta.json();
         viajes = Object.values(datos);
         poblarListaChoferes();
@@ -106,14 +200,12 @@
         console.error("Error al obtener los datos:", error);
       }
     }
-
+    
     function poblarListaChoferes() {
       const choferesUnicos = [...new Set(viajes.map(v => v["MOTORISTA 1"]))];
       choferesUnicos.sort();
-
       const select = document.getElementById("choferInput");
       select.innerHTML = `<option value="">Todos</option>`;
-
       choferesUnicos.forEach(chofer => {
         let option = document.createElement("option");
         option.value = chofer;
@@ -121,45 +213,44 @@
         select.appendChild(option);
       });
     }
-
+    
     function formatearMoneda(valor) {
       return `₲ ${parseFloat(valor).toLocaleString("es-PY")}`;
     }
-
+    
+    // Retorna un badge moderno para el "Tipo de Viaje"
     function determinarTipoViaje(viatico) {
-      return viatico > 0 ? "Tramo Interior" : "Tramo Metro";
+      return viatico > 0 
+        ? `<span class="badge interior">Interior</span>` 
+        : `<span class="badge metro">Metro</span>`;
     }
-
-    // Función auxiliar para comparar dos fechas (día, mes y año)
+    
+    // Compara dos objetos Date (día, mes y año)
     function fechasIguales(fecha1, fecha2) {
       return fecha1.getFullYear() === fecha2.getFullYear() &&
              fecha1.getMonth() === fecha2.getMonth() &&
              fecha1.getDate() === fecha2.getDate();
     }
-
-    // Función para convertir una fecha en formato dd/mm/yyyy a objeto Date (local)
+    
+    // Convierte fecha en formato dd/mm/yyyy a Date
     function parseDateString(dateStr) {
       let partes = dateStr.trim().split("/");
-      // partes[0] = día, partes[1] = mes, partes[2] = año
       return new Date(partes[2], partes[1] - 1, partes[0]);
     }
-
-    // Función para procesar la fecha del input (que viene en formato yyyy-mm-dd) a Date local
+    
+    // Convierte fecha del input (yyyy-mm-dd) a Date
     function parseInputDate(dateStr) {
       let partes = dateStr.split("-");
-      // partes[0] = año, partes[1] = mes, partes[2] = día
       return new Date(partes[0], partes[1] - 1, partes[2]);
     }
-
+    
     function filtrarViajes() {
       const choferFiltro = document.getElementById("choferInput").value;
       const fechaViajeInput = document.getElementById("fechaViaje").value;
-      // Procesar la fecha del input utilizando parseInputDate para obtener la fecha local correcta
       const fechaViajeObj = fechaViajeInput ? parseInputDate(fechaViajeInput) : null;
-
+      
       const viajesFiltrados = viajes.filter(viaje => {
         const cumpleChofer = choferFiltro ? viaje["MOTORISTA 1"] === choferFiltro : true;
-        // Convertir la fecha del registro (asumimos que viene en formato "dd/mm/yyyy") a objeto Date
         const fechaRegistroStr = viaje["DATA DA VIAGEM"];
         const fechaViajeRegistro = fechaRegistroStr ? parseDateString(fechaRegistroStr) : null;
         const cumpleFecha = fechaViajeObj
@@ -167,13 +258,26 @@
           : true;
         return cumpleChofer && cumpleFecha;
       });
-
+      
       mostrarViajes(viajesFiltrados);
     }
-
+    
     function mostrarViajes(viajesFiltrados) {
       const tabla = document.getElementById("tablaViajes");
       tabla.innerHTML = `
+        <colgroup>
+          <col style="width: 7%;">
+          <col style="width: 20%;">
+          <col style="width: 12%;">
+          <col style="width: 12%;">
+          <col style="width: 5%;">
+          <col style="width: 9%;">
+          <col style="width: 7%;">
+          <col style="width: 5%;">
+          <col style="width: 5%;">
+          <col style="width: 9%;">
+          <col style="width: 7%;">
+        </colgroup>
         <tr>
           <th>Fecha</th>
           <th>Chofer</th>
@@ -188,16 +292,14 @@
           <th>Tipo de Viaje</th>
         </tr>
       `;
-
-      if (!viajesFiltrados.length) {
+      
+      if (viajesFiltrados.length === 0) {
         tabla.innerHTML += `<tr><td colspan="11">No se encontraron viajes.</td></tr>`;
         return;
       }
-
+      
       viajesFiltrados.forEach(viaje => {
-        let tipoViaje = determinarTipoViaje(viaje["VIATICO"]);
-        let claseTipoViaje = tipoViaje === "Tramo Interior" ? "tramo-interior" : "";
-        
+        let tipoViajeHTML = determinarTipoViaje(viaje["VIATICO"]);
         let fila = tabla.insertRow();
         fila.innerHTML = `
           <td>${viaje["DATA DA VIAGEM"]}</td>
@@ -210,13 +312,13 @@
           <td>${viaje["CI"]}</td>
           <td>${viaje["TIPO"]}</td>
           <td>${formatearMoneda(viaje["RV GENERAL"])}</td>
-          <td class="${claseTipoViaje}">${tipoViaje}</td>
+          <td>${tipoViajeHTML}</td>
         `;
       });
-
+      
       let totalRVGeneral = viajesFiltrados.reduce((acc, viaje) => acc + (parseFloat(viaje["RV GENERAL"]) || 0), 0);
       let totalViatico = viajesFiltrados.reduce((acc, viaje) => acc + (parseFloat(viaje["VIATICO"]) || 0), 0);
-
+      
       let filaTotal = tabla.insertRow();
       filaTotal.innerHTML = `
         <td colspan="6" class="total">TOTAL</td>
@@ -227,18 +329,16 @@
         <td></td>
       `;
     }
-
+    
     function mostrarTodos() {
       mostrarViajes(viajes);
     }
-
-    // Función para volver al inicio: redirige a la URL especificada
+    
     function volverAlInicio() {
       window.location.href = 'https://fadelt1.github.io/indextotenadm/#';
     }
-
+    
     obtenerViajesDesdeFirebase();
   </script>
-
 </body>
 </html>
